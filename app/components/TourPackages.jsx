@@ -97,7 +97,7 @@ export default function TourPackages() {
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                   <div className="relative aspect-square">
                     <Image
-                      src={pkg.image}
+                      src={pkg.url}
                       alt={pkg.name}
                       layout="fill"
                       objectFit="cover"
@@ -115,8 +115,8 @@ export default function TourPackages() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold mb-1 text-[#2B3B5B]">hh</h3>
-                    <p className="text-sm text-[#FF8C00] font-semibold">Starting from </p>
+                    <h3 className="text-lg font-semibold mb-1 text-[#2B3B5B]">{pkg.name}</h3>
+                    <p className="text-sm text-[#FF8C00] font-semibold">{pkg.name}</p>
                   </div>
                 </div>
               </SwiperSlide>
