@@ -21,7 +21,7 @@ export default function TourPackageDetails({ pkg, onClose, onBookNow }) {
       >
         <div className="relative aspect-square w-full max-w-[250px] mx-auto">
           <Image 
-            src={`https://narialandingserver.vercel.app${pkg.imageUrl}`}
+            src={pkg.imageUrl}
             alt={pkg.title} 
             layout="fill" 
             objectFit="cover" 

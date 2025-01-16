@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import useAxiosPublic from '../hooks/useAxiosPublic';
+import useAxiosPublic from '../hooks/useAxiosPublic'
 
 const PDFDownloadButton = dynamic(() => import('./PDFDownloadButton'), {
   ssr: false,
@@ -11,82 +11,85 @@ const PDFDownloadButton = dynamic(() => import('./PDFDownloadButton'), {
 
 export default function BookingList() {
   const [bookings, setBookings] = useState([])
-  //Booking get
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const axiosPublic = useAxiosPublic()
+
   useEffect(() => {
-    const axiosPublic = useAxiosPublic();
-
-    const fetchBooking = async () => {
+    const fetchBookings = async () => {
       try {
-        const res = await axiosPublic.get('/booking');  // Make GET request to fetch videos
-        setBookings(res.data);  // Update the videos state with the fetched data
-        console.log(res.data); // Log the fetched data
+        setIsLoading(true)
+        const res = await axiosPublic.get('/booking')
+        setBookings(res.data)
+        setError('')
       } catch (error) {
-        console.error('Error fetching Booking:', error);
-        setError('There was an error fetching the Booking.');
+        console.error('Error fetching Bookings:', error)
+        setError('There was an error fetching the Bookings. Please try again later.')
+      } finally {
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchBooking();  // Make the API call directly inside the useEffect
-  }, []);
-
-
-
-
+    fetchBookings()
+  }, [axiosPublic])
 
   const handleDelete = async (id) => {
     try {
-      const axiosPublic = useAxiosPublic();
-      // Make the DELETE request to the server
-      const response = await axiosPublic.delete(`/booking/${id}`);
-
-      // Check if the deletion was successful
+      const response = await axiosPublic.delete(`/booking/${id}`)
       if (response.status === 200) {
-        // Reload the page after successful deletion
-        window.location.reload();
+        setBookings(bookings.filter(booking => booking._id !== id))
       } else {
-        console.error('Failed to delete the video');
+        throw new Error('Failed to delete the booking')
       }
     } catch (error) {
-      console.error('Error deleting the video:', error);
+      console.error('Error deleting the booking:', error)
+      setError('An error occurred while deleting the booking. Please try again.')
     }
-  };
+  }
 
+  if (isLoading) {
+    return <div className="text-center py-4">Loading...</div>
+  }
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Booking List</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Email</th>
-              <th className="px-4 py-2">Contact No.</th>
-              <th className="px-4 py-2">Country Destinations</th>
-              <th className="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((booking) => (
-              <tr key={booking._id}>
-                {/* <td className="border px-4 py-2">{booking._id}</td> */}
-                <td className="border px-4 py-2">{booking.name}</td>
-                <td className="border px-4 py-2">{booking.email}</td>
-                <td className="border px-4 py-2">{booking.contractNo}</td>
-                <td className="border px-4 py-2">{booking.countryDestinations}</td>
-                <td className="border px-4 py-2">
-                  <button
-                    onClick={() => handleDelete(booking._id)}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {bookings.length === 0 ? (
+        <p>No bookings available.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Email</th>
+                <th className="px-4 py-2">Contact No.</th>
+                <th className="px-4 py-2">Country Destinations</th>
+                <th className="px-4 py-2">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {bookings.map((booking) => (
+                <tr key={booking._id}>
+                  <td className="border px-4 py-2">{booking.name}</td>
+                  <td className="border px-4 py-2">{booking.email}</td>
+                  <td className="border px-4 py-2">{booking.contractNo}</td>
+                  <td className="border px-4 py-2">{booking.countryDestinations}</td>
+                  <td className="border px-4 py-2">
+                    <button
+                      onClick={() => handleDelete(booking._id)}
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <div className="mt-4">
         <PDFDownloadButton bookings={bookings} />
       </div>

@@ -95,7 +95,7 @@ export default function TourPackages() {
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                   <div className="relative aspect-square">
                     <Image
-                      src={`https://narialandingserver.vercel.app${pkg.imageUrl}`}
+                      src={pkg.imageUrl}
                       alt={pkg.title}
                       layout="fill"
                       objectFit="cover"
