@@ -11,40 +11,38 @@ import TourPackageDetails from './TourPackageDetails'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
-import useAxiosPublic from './hooks/useAxiosPublic'
-
-const packages = [
-  { id: 1, name: 'Beach Paradise', price: '$999', image: '/placeholder.svg?height=300&width=400', description: 'Experience the ultimate beach getaway with crystal clear waters and white sandy beaches.' },
-  { id: 2, name: 'Mountain Escape', price: '$1299', image: '/placeholder.svg?height=300&width=400', description: 'Embark on a thrilling adventure in the majestic mountains with breathtaking views and fresh air.' },
-  { id: 3, name: 'City Explorer', price: '$899', image: '/placeholder.svg?height=300&width=400', description: 'Discover the vibrant culture and exciting nightlife of world-renowned cities.' },
-  { id: 4, name: 'Desert Safari', price: '$1099', image: '/placeholder.svg?height=300&width=400', description: 'Experience the magic of the desert with camel rides and stargazing under the clear night sky.' },
-  { id: 5, name: 'Tropical Island', price: '$1499', image: '/placeholder.svg?height=300&width=400', description: 'Escape to a secluded tropical island paradise with overwater bungalows and pristine beaches.' },
-]
+import useAxiosPublic from '../components/hooks/useAxiosPublic'
 
 export default function TourPackages() {
   const [selectedPackage, setSelectedPackage] = useState(null)
   const [packages, setPackages] = useState([])
   
-  
-
-
-  // Fetch video URL
   useEffect(() => {
     const axiosPublic = useAxiosPublic()
 
-    const fetchVideo = async () => {
+    const fetchPackages = async () => {
       try {
-        const res = await axiosPublic.get('/card')  // Fetch video data from API
-        setPackages(res.data)  // Set the video URL in state
+        const res = await axiosPublic.get('/card')
+        setPackages(res.data)
       } catch (error) {
-        console.error('Error fetching video:', error)
+        console.error('Error fetching packages:', error)
       }
     }
 
-    fetchVideo()  // Fetch video URL when the component mounts
+    fetchPackages()
   }, [])
 
+  useEffect(() => {
+    if (selectedPackage) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
 
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [selectedPackage])
 
   const handleBookNow = () => {
     setSelectedPackage(null)
@@ -93,12 +91,12 @@ export default function TourPackages() {
             }}
           >
             {packages.map((pkg) => (
-              <SwiperSlide key={pkg.id}>
+              <SwiperSlide key={pkg._id}>
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                   <div className="relative aspect-square">
                     <Image
-                      src={pkg.url}
-                      alt={pkg.name}
+                      src={`https://narialandingserver.vercel.app${pkg.imageUrl}`}
+                      alt={pkg.title}
                       layout="fill"
                       objectFit="cover"
                       className="w-full h-full"
@@ -115,8 +113,8 @@ export default function TourPackages() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold mb-1 text-[#2B3B5B]">{pkg.name}</h3>
-                    <p className="text-sm text-[#FF8C00] font-semibold">{pkg.name}</p>
+                    <h3 className="text-lg font-semibold mb-1 text-[#2B3B5B]">{pkg.title}</h3>
+                    <p className="text-sm text-[#FF8C00] font-semibold">{pkg.header}</p>
                   </div>
                 </div>
               </SwiperSlide>

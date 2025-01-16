@@ -9,7 +9,7 @@ export default function TourPackageDetails({ pkg, onClose, onBookNow }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto"
       onClick={onClose}
     >
       <motion.div
@@ -21,8 +21,8 @@ export default function TourPackageDetails({ pkg, onClose, onBookNow }) {
       >
         <div className="relative aspect-square w-full max-w-[250px] mx-auto">
           <Image 
-            src={pkg.image} 
-            alt={pkg.name} 
+            src={`https://narialandingserver.vercel.app${pkg.imageUrl}`}
+            alt={pkg.title} 
             layout="fill" 
             objectFit="cover" 
             className="rounded-lg"
@@ -30,22 +30,12 @@ export default function TourPackageDetails({ pkg, onClose, onBookNow }) {
         </div>
         <div className="flex flex-col flex-grow overflow-hidden">
           <div className="p-4 overflow-y-auto flex-grow scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">{pkg.name}</h2>
-            <p className="text-base text-gray-600 mb-2">Starting from {pkg.price}</p>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">{pkg.title}</h2>
+            <p className="text-base text-gray-600 mb-2">{pkg.header}</p>
             <div className="text-sm text-gray-700 space-y-2">
               <p>{pkg.description}</p>
-              <p>Immerse yourself in the beauty of our tropical paradise, where crystal-clear waters meet powdery white sand beaches. Our overwater bungalows offer a unique and luxurious experience, allowing you to wake up to stunning ocean views every morning.</p>
-              <p>During your stay, you can enjoy a wide range of activities:</p>
-              <ul className="list-disc list-inside ml-4 space-y-1">
-                <li>Snorkeling in vibrant coral reefs</li>
-                <li>Sunset sailing excursions</li>
-                <li>Beachfront yoga sessions</li>
-                <li>Spa treatments with ocean views</li>
-                <li>Gourmet dining experiences</li>
-                <li>Island-hopping adventures</li>
-              </ul>
-              <p>Our all-inclusive packages ensure a worry-free vacation, with meals, drinks, and many activities included in your stay. Whether you're seeking romance, relaxation, or adventure, our tropical island getaway offers something for everyone.</p>
-              <p>Book now to secure your slice of paradise and create unforgettable memories in one of the world's most beautiful destinations.</p>
+              <p>{pkg.shortDescription}</p>
+              <p>{pkg.subHeader}</p>
             </div>
           </div>
           <div className="p-4 bg-gray-100 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 sm:space-x-2">

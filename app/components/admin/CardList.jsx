@@ -4,132 +4,124 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form';
 import useAxiosPublic from '../hooks/useAxiosPublic';
 import Swal from 'sweetalert2';
+import Image from 'next/image';
 
 export default function CardList() {
   const [cards, setCards] = useState([])
-  const [newCard, setNewCard] = useState({ title: '', url: '' })
-  const [error, setError] = useState('')  // Declare the error state
+  const [error, setError] = useState('')
+  const axiosPublic = useAxiosPublic();
 
-
-
-
-
-
-  //video link
   useEffect(() => {
-    const axiosPublic = useAxiosPublic();
-
     const fetchCards = async () => {
       try {
-        const res = await axiosPublic.get('/card');  // Make GET request to fetch videos
-        setCards(res.data);  // Update the videos state with the fetched data
+        const res = await axiosPublic.get('/card');
+        setCards(res.data);
       } catch (error) {
-        console.error('Error fetching videos:', error);
-        setError('There was an error fetching the video links.');
+        console.error('Error fetching cards:', error);
+        setError('There was an error fetching the cards.');
       }
     };
 
-    fetchCards();  // Make the API call directly inside the useEffect
-  }, []);
+    fetchCards();
+  }, [axiosPublic]);
 
   const handleDelete = async (id) => {
     try {
-      const axiosPublic = useAxiosPublic();
-      // Make the DELETE request to the server
       const response = await axiosPublic.delete(`/card/${id}`);
-
-      // Check if the deletion was successful
       if (response.status === 200) {
-        // Reload the page after successful deletion
-        window.location.reload();
+        setCards(cards.filter(card => card._id !== id));
+        Swal.fire('Deleted!', 'The card has been deleted.', 'success');
       } else {
-        console.error('Failed to delete the video');
+        console.error('Failed to delete the card');
+        Swal.fire('Error', 'Failed to delete the card', 'error');
       }
     } catch (error) {
-      console.error('Error deleting the video:', error);
+      console.error('Error deleting the card:', error);
+      Swal.fire('Error', 'An error occurred while deleting the card', 'error');
     }
   };
 
-
-
-
-
-
-
-
-
-
-
-
-  //add Video link
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
   const onSubmit = async (data) => {
-    const { title, header, subHeader, description, subDescription, url } = data;
+    const { title, header, subHeader, description, shortDescription, image } = data;
 
-    const CardInfo = {
-      title: title,
-      header: header,
-      subHeader: subHeader,
-      description: description,
-      subDescription: subDescription,
-      url: url
-    };
-
-    const axiosPublic = useAxiosPublic(); // Get the axios instance
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('header', header);
+    formData.append('subHeader', subHeader);
+    formData.append('description', description);
+    formData.append('shortDescription', shortDescription);
+    formData.append('image', image[0]);
 
     try {
-      const res = await axiosPublic.post('/card', CardInfo);
-      reset();
-
+      const res = await axiosPublic.post('/card', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       if (res.status === 201 && res.data.insertedId) {
-        reset();
-
         Swal.fire({
           title: 'Success!',
-          text: 'Video added successfully.',
+          text: 'Card added successfully.',
           icon: 'success',
         });
-        window.location.reload();
-
+        reset();
+        // Fetch cards again to update the list
+        const updatedCards = await axiosPublic.get('/card');
+        setCards(updatedCards.data);
       } else {
         Swal.fire({
           title: 'Warning!',
-          text: 'The video was not added successfully.',
+          text: 'The card was not added successfully.',
           icon: 'warning',
         });
       }
     } catch (error) {
+      console.error('Error details:', error.response?.data || error.message);
       Swal.fire({
         title: 'Error!',
-        text: 'There was an error while adding the video.',
+        text: `There was an error while adding the card: ${error.response?.data || error.message}`,
         icon: 'error',
       });
     }
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Card List</h2>
-      {error && <p className="text-red-500">{error}</p>} {/* Show error message if it exists */}
+    <div className="container mx-auto px-4">
+      <h2 className="text-2xl font-semibold mb-6">Card List</h2>
+      {error && <p className="text-red-500 mb-4">{error}</p>}
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white">
+        <table className="min-w-full bg-white border border-gray-300">
           <thead>
-            <tr>
-              <th className="px-4 py-2">Title</th>
-              <th className="px-4 py-2">Header</th>
-              <th className="px-4 py-2">Sub Description</th>
-
+            <tr className="bg-gray-100">
+              <th className="px-4 py-2 text-left">Image</th>
+              <th className="px-4 py-2 text-left">Title</th>
+              <th className="px-4 py-2 text-left">Header</th>
+              <th className="px-4 py-2 text-left">Sub Header</th>
+              <th className="px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {cards.map((card) => (
-              <tr key={card._id}>
-                <td className="border px-4 py-2">{card.title}</td>
-                <td className="border px-4 py-2">{card.header}</td>
-                <td className="border px-4 py-2">{card.subHeader}</td>
-
-                <td className="border px-4 py-2">
+              <tr key={card._id} className="border-t border-gray-300">
+                <td className="px-4 py-2">
+                  {card.imageUrl && (
+                    <Image
+                    src={`https://narialandingserver.vercel.app${card.imageUrl}`}
+                      alt={card.title}
+                      width={50}
+                      // http://localhost:5000
+                      height={50}
+                      className="object-cover rounded"
+                    />
+                  )}
+                </td>
+                <td className="px-4 py-2">{card.title}</td>
+                <td className="px-4 py-2">{card.header}</td>
+                <td className="px-4 py-2">{card.subHeader}</td>
+                <td className="px-4 py-2">
                   <button
                     onClick={() => handleDelete(card._id)}
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
@@ -140,88 +132,66 @@ export default function CardList() {
               </tr>
             ))}
           </tbody>
-
-
-
         </table>
       </div>
-      {/* <form onSubmit={handleSubmit(onSubmit)} className="mt-4 flex gap-4">
-          <input type="text" name="Title" placeholder="Title" className="input input-bordered" required {...register("title", { required: true })} />
 
-          <input type="text" name="Header" placeholder="Header" className="input input-bordered" required {...register("header", { required: true })} />
-
-          <input type="text" name="Sub Header" placeholder="Sub Header" className="input input-bordered" required {...register("subHeader", { required: true })} />
-
-          <input type="text" name="Description" placeholder="Description" className="input input-bordered" required {...register("description", { required: true })} />
-          <input type="text" name="Short Description" placeholder="Short Description" className="input input-bordered" required {...register("shortDescription", { required: true })} />
-
-          <input type="url" name="URL" placeholder="Image URL" className="input input-bordered" required {...register("url", { required: true })} />
-
-          <div className="form-control ">
-            <button className="btn btn-primary  ">Add Card</button>
-          </div>
-        </form> */}
-<div className='my-10'><p className='text-center text-2xl font-bold'>AddCard</p></div>
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-4 grid gap-4 md:grid-cols-2">
+      <div className='my-10'>
+        <h3 className='text-center text-2xl font-bold'>Add New Card</h3>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 md:grid-cols-2">
         <input
           type="text"
-          name="Title"
           placeholder="Title"
-          className="input input-bordered"
-          required
-          {...register("title", { required: true })}
+          className="input input-bordered w-full"
+          {...register("title", { required: "Title is required" })}
         />
+        {errors.title && <p className="text-red-500">{errors.title.message}</p>}
 
         <input
           type="text"
-          name="Header"
           placeholder="Header"
-          className="input input-bordered"
-          required
-          {...register("header", { required: true })}
+          className="input input-bordered w-full"
+          {...register("header", { required: "Header is required" })}
         />
+        {errors.header && <p className="text-red-500">{errors.header.message}</p>}
 
         <input
           type="text"
-          name="Sub Header"
           placeholder="Sub Header"
-          className="input input-bordered"
-          required
-          {...register("subHeader", { required: true })}
+          className="input input-bordered w-full"
+          {...register("subHeader", { required: "Sub Header is required" })}
         />
+        {errors.subHeader && <p className="text-red-500">{errors.subHeader.message}</p>}
 
         <input
           type="text"
-          name="Description"
           placeholder="Description"
-          className="input input-bordered"
-          required
-          {...register("description", { required: true })}
+          className="input input-bordered w-full"
+          {...register("description", { required: "Description is required" })}
         />
+        {errors.description && <p className="text-red-500">{errors.description.message}</p>}
 
         <input
           type="text"
-          name="Short Description"
           placeholder="Short Description"
-          className="input input-bordered"
-          required
-          {...register("shortDescription", { required: true })}
+          className="input input-bordered w-full"
+          {...register("shortDescription", { required: "Short Description is required" })}
         />
+        {errors.shortDescription && <p className="text-red-500">{errors.shortDescription.message}</p>}
 
         <input
-          type="url"
-          name="URL"
-          placeholder="Image URL"
-          className="input input-bordered"
-          required
-          {...register("url", { required: true })}
+          type="file"
+          accept="image/*"
+          className="file-input file-input-bordered w-full"
+          {...register("image", { required: "Image is required" })}
         />
+        {errors.image && <p className="text-red-500">{errors.image.message}</p>}
 
-        <div className="form-control md:col-span-2">
-          <button className="btn btn-primary w-full">Add Card</button>
+        <div className="md:col-span-2">
+          <button type="submit" className="btn btn-primary w-full">Add Card</button>
         </div>
       </form>
-
     </div>
   )
 }
+

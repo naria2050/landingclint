@@ -5,23 +5,35 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
-
-const announcements = [
-  "🌟 Summer Sale: 20% off all beach packages!",
-  "🏔️ New mountain tours available now!",
-  "🎉 Book now and get a free city tour!"
-]
+import useAxiosPublic from '../components/hooks/useAxiosPublic'
 
 export default function Header() {
+  const [announcements, setAnnouncements] = useState([])
   const [currentAnnouncement, setCurrentAnnouncement] = useState(0)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const axiosPublic = useAxiosPublic()
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentAnnouncement((prev) => (prev + 1) % announcements.length)
-    }, 7000)
-    return () => clearInterval(interval)
+    const fetchAnnouncements = async () => {
+      try {
+        const response = await axiosPublic.get('/news')
+        setAnnouncements(response.data.map(item => item.content))
+      } catch (error) {
+        console.error('Failed to fetch announcements:', error)
+      }
+    }
+
+    fetchAnnouncements()
   }, [])
+
+  useEffect(() => {
+    if (announcements.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentAnnouncement((prev) => (prev + 1) % announcements.length)
+      }, 7000)
+      return () => clearInterval(interval)
+    }
+  }, [announcements])
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -41,10 +53,10 @@ export default function Header() {
             />
           </div>
           <div className="hidden md:flex space-x-6">
-            <Link href="#" className="hover:text-[#FF8C00] transition duration-300">Home</Link>
+            <Link href="#" className="hover:text-[#FF8C00] transition duration-300 font-bold">Home</Link>
             <Link 
               href="#contact" 
-              className="hover:text-[#FF8C00] transition duration-300"
+              className="hover:text-[#FF8C00] transition duration-300 font-bold"
               onClick={(e) => {
                 e.preventDefault();
                 document.querySelector('footer').scrollIntoView({ behavior: 'smooth' });
@@ -96,20 +108,23 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      <div className="bg-gradient-to-r from-[#FF8C00] to-[#FF6B00] py-8 px-4 relative">
-        <motion.div
-          key={currentAnnouncement}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          transition={{ duration: 0.5 }}
-          className="container mx-auto flex items-center justify-center"
-        >
-          <p className="text-center font-bold text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl max-w-4xl mx-auto px-12">
-            {announcements[currentAnnouncement]}
-          </p>
-        </motion.div>
+      <div className="bg-gradient-to-r from-[#FF8C00] to-[#FF6B00] py-8 px-4 min-h-40 relative border ">
+        {announcements.length > 0 && (
+          <motion.div
+            key={currentAnnouncement}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.5 }}
+            className="container mx-auto flex items-center justify-center"
+          >
+            <p className="text-center font-bold text-white text-xl sm:text-2xl md:text-2xl lg:text-2xl  mx-auto px-12">
+              {announcements[currentAnnouncement]}
+            </p>
+          </motion.div>
+        )}
       </div>
     </header>
   )
 }
+
