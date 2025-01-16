@@ -61,7 +61,7 @@ export default function Footer() {
                 <SocialLink href="https://twitter.com/nariaholidays" icon={Twitter} color="#1DA1F2" />
                 <SocialLink href="https://instagram.com/nariaholidays" icon={Instagram} color="#E4405F" />
                 <SocialLink href="https://youtube.com/nariaholidays" icon={Youtube} color="#FF0000" />
-                <SocialLink href="https://wa.me/8801972994676" icon={WhatsApp} color="#25D366" />
+                <SocialLink href="https://wa.me/+8802222225357" icon={WhatsApp} color="#25D366" />
               </div>
             </div>
           </FooterSection>
