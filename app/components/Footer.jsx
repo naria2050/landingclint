@@ -42,7 +42,7 @@ export default function Footer() {
           <FooterSection title="CONTACT US" id="contact">
             <div className="space-y-4">
               <ContactItem icon={MapPin} text="Sky View Trade Valley, (13th Floor),66/1 VIP Road Naya Paltan, Dhaka-1000, Bangladesh." />
-              <ContactItem icon={Phone} text="+8801972-994676" href="tel:+8801972-994676" />
+              <ContactItem icon={Phone} text="+8802222225357" href="tel:+8802222225357" />
               <ContactItem icon={Mail} text="info@nariaholidays.com" href="mailto:info@nariaholidays.com" />
               <Link 
                 href="https://maps.google.com" 
